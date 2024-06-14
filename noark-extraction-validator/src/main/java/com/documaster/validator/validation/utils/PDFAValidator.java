@@ -19,19 +19,28 @@ package com.documaster.validator.validation.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
-import org.apache.pdfbox.preflight.Format;
-import org.apache.pdfbox.preflight.PreflightDocument;
-import org.apache.pdfbox.preflight.ValidationResult;
-import org.apache.pdfbox.preflight.parser.PreflightParser;
 import org.apache.tika.Tika;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.verapdf.gf.foundry.VeraGreenfieldFoundryProvider;
+import org.verapdf.pdfa.Foundries;
+import org.verapdf.pdfa.PDFAParser;
+import org.verapdf.pdfa.VeraPDFFoundry;
+import org.verapdf.pdfa.flavours.PDFAFlavour;
 
 public class PDFAValidator {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(PDFAValidator.class);
 	public static final String VALID_FILE_TYPE = "application/pdf";
+
+	private static final PDFAFlavour PDFA_FLAVOUR;
+	private static final VeraPDFFoundry VERA_PDF_FOUNDRY;
+
+	static {
+
+		VeraGreenfieldFoundryProvider.initialise();
+		VERA_PDF_FOUNDRY = Foundries.defaultInstance();
+		PDFA_FLAVOUR = PDFAFlavour.fromString("1b");
+	}
 
 	public static String getFileType(File file) throws IOException {
 
@@ -45,37 +54,16 @@ public class PDFAValidator {
 
 	public static boolean isValidPdfaFile(File file) throws IOException {
 
-		boolean isValidPdfAFile;
+		try (PDFAParser parser = VERA_PDF_FOUNDRY.createParser(Files.newInputStream(file.toPath()))) {
 
-		try {
+			return VERA_PDF_FOUNDRY
+					.createValidator(PDFA_FLAVOUR, false)
+					.validate(parser)
+					.isCompliant();
 
-			String contentType = getFileType(file);
+		} catch (Exception e) {
 
-			if (contentType.equalsIgnoreCase(VALID_FILE_TYPE)) {
-
-				ValidationResult result;
-
-				PreflightParser parser = new PreflightParser(file);
-				parser.parse(Format.PDF_A1B);
-
-				PreflightDocument document = parser.getPreflightDocument();
-				document.validate();
-				result = document.getResult();
-
-				isValidPdfAFile = result.isValid();
-
-				document.close();
-
-			} else {
-				isValidPdfAFile = false;
-			}
-
-		} catch (Exception ex) {
-			// Silence the exception
-			// PDF Box and Preflight are quite verbose and the exceptions can potentially flood the log
-			isValidPdfAFile = false;
+			return false;
 		}
-
-		return isValidPdfAFile;
 	}
 }
