@@ -28,7 +28,7 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- XJC (XSD scema converter) -->
+		<!-- XJC (XSD schema converter) -->
 
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
