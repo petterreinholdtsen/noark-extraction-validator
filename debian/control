@@ -3,6 +3,18 @@ Section: misc
 Priority: optional
 Maintainer: Documaster Support <support@documaster.no>
 Build-Depends: debhelper (>=9)
+ , libslf4j-java
+ , liblog4j2-java
+ , libmaven-compiler-plugin-java
+ , libmaven-jar-plugin-java
+ , libmaven-shade-plugin-java
+ , libcommons-io-java
+ , libcommons-lang3-java
+ , libcommons-configuration2-java
+ , libbcprov-java
+ , libjaxb-java
+ , libhsqldb-java
+ , libjcommander-java
 
 Package: documaster-noark-extraction-validator
 Architecture: any
